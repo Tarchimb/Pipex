@@ -8,7 +8,7 @@ char *ft_get_envp_path(char **envp, char *path)
     while (envp[i])
     {
         path = ft_strnstr(envp[i],
-            "PATH=/opt/homebrew/bin:", ft_strlen(envp[i]));
+            "PATH=", ft_strlen(envp[i]));
         if (path != NULL)
             return (path);
         i++;
