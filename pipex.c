@@ -1,112 +1,109 @@
 
 #include "./Includes/pipex.h"
 
-char *ft_child_process(char *argv, char **envp, char **paths)
+void	*ft_free_all(void **tab)
 {
-    char    *cmd;
-    char    **args;
-    static int     i = 0;
-    static int     j = 0;
+	int	i;
 
-    (void)argv;
-    (void)envp;
-    (void)args;
-    args = ft_split(argv, ' ');
+	i = 0;
+	if (!tab)
+		return (0);
+	while (tab[i])
+	{
+		if (tab[i])
+			free(tab[i]);
+		i++;
+	}
+	free(tab);
+	return (0);
+}
+
+char *ft_child_process(char **argv, char **envp, char **paths, int *j)
+{
+    char        *cmd;
+    char        **args;
+    int         i;
+
+    i = 0;
+    args = ft_split(argv[*j], ' ');
+    if (!args)
+        return (NULL);
     while (paths[i])
     {
-        while (args[j])
-        {
-            cmd = ft_strjoin(paths[i],argv);
-            if (execve(cmd, args, envp) != -1)
-                return (cmd);
-            free(cmd);
-            j++;
-        }
-        j = 0;
+        cmd = ft_strjoin(paths[i],args[0]);
+        execve(cmd, args, envp);
+        free(cmd);
         i++;
     }
+    ft_free_all((void **)args);
     return (NULL);
 }
 
-
-int ft_pipex(char **argv, char **envp, char **paths, int fd1, int fd2)
+void ft_get_fd(t_fd *fd, int *j)
 {
-    int     fd[2];
-    int     id;
-    int     i = 0;
-    pipe(fd);
-    (void)envp;
-    (void)paths;
-    (void)argv;
-    (void)i;
-
-    id = fork();
-    if (id == 0)
+    if (fd->id == 0)
     {
-        dup2(fd1, 0);
-        dup2(fd[1], 1);
-        close(fd[0]);
-        while (i++ < 10)
-            execve(ft_child_process(argv[1], envp, paths), argv + 1, envp);
-        close (fd1);
-        //close (fd[1]);
+        dup2(fd->fd1, STDIN);
+        dup2(fd->fd[1], STDOUT);
+        close(fd->fd[0]);
+        close (fd->fd1);
     }
     else
     {
-        waitpid(-1, &id, 0);
-        dup2(fd2, 1);
-        dup2(fd[0], 0);
-        close(fd[1]);
-        while (i++ < 10)
-            execve(ft_child_process(argv[4], envp, paths), argv + 1, envp);
-        close(fd2);
-        //close(fd[0]);
+        *j += 1;
+        waitpid(-1, &fd->id, 0);
+        dup2(fd->fd[0], STDIN);
+        dup2(fd->fd2, STDOUT);
+        close(fd->fd[1]);
+        close(fd->fd2);
     }
+}
+
+int ft_get_cmd_number(char **argv)
+{
+    int i;
+    int j;
+
+    i = 0;
+    j = 0;
+    while (argv[i])
+        if (argv[i][0] == '|')
+            j++;
+    return (j);
+}
+
+int ft_pipex(int argc, char **argv, char **envp, char **paths)
+{
+    static int  j = 2;
+    t_fd    fd;
+
+    fd.fd1 = open(argv[1], O_RDONLY);
+    fd.fd2 = open(argv[argc], O_CREAT | O_RDWR | O_TRUNC, 0644);
+    if (fd.fd1 < 0 || fd.fd2 < 0)
+        return (0);
+    fd.pipe_nb = ft_get_cmd_number(argv);
+    pipe(fd.fd);
+    fd.id = fork();
+    ft_get_fd(&fd, &j);
+    if (!ft_child_process(argv, envp, paths, &j))
+        return (0);
     return (1);
 }
+
 
 int main(int argc, char **argv, char **envp)
 {
     char    **paths;
-    int     fd1;
-    int     fd2;
-    (void)argc;
-    (void)argv;
-    fd1 = open(argv[1], O_RDONLY);
-    fd2 = open(argv[4], O_CREAT | O_RDWR | O_TRUNC, 0644);
-    if (fd1 < 0 || fd2 < 0)
+
+    if (!argc)
         return (0);
-    //char    pat[] = "/bin/";
     paths = ft_parsing(envp);
     if (!paths)
         return (0);
-    if (!ft_pipex(argv, envp, paths, fd1, fd2))
+    if (!ft_pipex(argc, argv, envp, paths))
+    {
+        ft_free_all((void **)paths);
         return (0);
-    //    return (0);
-    //path = NULL;
-    //if (access(argv[1], F_OK) == -1 || argc < 5) //check si le fichier existe
-    //   return (0);
-    //pipex(argv);
-    // int fd;
-    // fd = open("test.txt", O_RDWR);
-    // if (fd < 0)
-    //     return (0);
-    // dup2(fd, 0);
-    // execve(pat, argv + 1, envp);
-    //int i;
-    // for (i = 0; i < 10; i++)
-    // printf("%s\n", path[i]);
+    }
     return (0);
 }
-
-// int
-// main(int argc, char *argv[], char *env[])
-// {
-//   if (argc > 1)
-//     if (execve(argv[1], argv + 1, env) == -1)
-//       perror("execve");
-
-//   printf("My pid is: %d\n", getpid());
-
-//   return 0;
-// }

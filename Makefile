@@ -36,7 +36,7 @@ all:		${NAME}
 
 gc:
 			${CC} ${CFLAGS} ${LIBS} pipex.c -o pipex
-			./pipex infile "ls" "ls" outfile
+			./pipex infile "ls" "wc -l" outfile
 
 
 $(NAME):	${OBJS} ${INCLUDES}
