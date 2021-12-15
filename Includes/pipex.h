@@ -13,6 +13,12 @@
 
 #define STDIN 0
 #define STDOUT 1
+#define STDERR 2
+
+#define ARGS_ERROR 0
+#define INFILE_ERROR 1
+#define OUTFILE_ERROR 2
+#define MALLOC_ERROR 3
 
 char    **ft_parsing(char **envp);
 char    *ft_get_envp_path(char **envp, char *path);

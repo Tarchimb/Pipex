@@ -36,7 +36,7 @@ all:		${NAME}
 
 gc:
 			${CC} ${CFLAGS} ${LIBS} pipex.c -o pipex
-			./pipex infile "sleep 2" "lr" "cat -e" "wc -l" outfile
+			./pipex infile "sleep 2" "lol" outfile
 
 
 $(NAME):	${OBJS} ${INCLUDES}
