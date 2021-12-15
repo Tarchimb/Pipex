@@ -18,91 +18,102 @@ void	*ft_free_all(void **tab)
 	return (0);
 }
 
-char *ft_child_process(char **argv, char **envp, char **paths, int *j)
+char *ft_child_process(t_args *args, int *j)
 {
     char        *cmd;
-    char        **args;
+    char        **arg;
     int         i;
 
     i = 0;
-    args = ft_split(argv[*j], ' ');
-    if (!args)
+    arg = ft_split(args->av[*j], ' ');
+    if (!arg)
         return (NULL);
-    while (paths[i])
+    while (args->paths[i])
     {
-        cmd = ft_strjoin(paths[i],args[0]);
-        execve(cmd, args, envp);
+        cmd = ft_strjoin(args->paths[i],arg[0]);
+		if (access(cmd, F_OK) == 0)
+        	execve(cmd, arg, args->env);
         free(cmd);
         i++;
     }
-    ft_free_all((void **)args);
+    ft_free_all((void **)arg);
     return (NULL);
 }
 
-void ft_get_fd(t_fd *fd, int *j)
+int ft_get_fd(t_fd *fd, int *j, t_args *args, int fdin)
 {
-    if (fd->id == 0)
-    {
-        dup2(fd->fd1, STDIN);
-        dup2(fd->fd[1], STDOUT);
-        close(fd->fd[0]);
-        close (fd->fd1);
-    }
-    else
-    {
-        *j += 1;
-        waitpid(-1, &fd->id, 0);
-        dup2(fd->fd[0], STDIN);
-        dup2(fd->fd2, STDOUT);
-        close(fd->fd[1]);
-        close(fd->fd2);
-    }
+	pipe(fd->fd);
+	fd->pid = fork();
+	if (fd->pid != 0)
+	{
+		close(fd->fd[1]);
+		dup2(fd->fd[0], STDIN);
+		waitpid(fd->pid, NULL, 0);
+	}
+	else
+	{
+		close(fd->fd[0]);
+		dup2(fd->fd[1], STDOUT);
+		if (fdin == STDIN)
+		 	exit(1);
+		else
+			ft_child_process(args, j);
+	}
+	return (0);
 }
 
-int ft_get_cmd_number(char **argv)
+int ft_pipex(t_args *args, t_fd *fd)
 {
-    int i;
-    int j;
+    int  j;
 
-    i = 0;
-    j = 0;
-    while (argv[i])
-        if (argv[i][0] == '|')
-            j++;
-    return (j);
-}
-
-int ft_pipex(int argc, char **argv, char **envp, char **paths)
-{
-    static int  j = 2;
-    t_fd    fd;
-
-    fd.fd1 = open(argv[1], O_RDONLY);
-    fd.fd2 = open(argv[argc], O_CREAT | O_RDWR | O_TRUNC, 0644);
-    if (fd.fd1 < 0 || fd.fd2 < 0)
-        return (0);
-    fd.pipe_nb = ft_get_cmd_number(argv);
-    pipe(fd.fd);
-    fd.id = fork();
-    ft_get_fd(&fd, &j);
-    if (!ft_child_process(argv, envp, paths, &j))
-        return (0);
+	j = 2;
+	dup2(fd->fd1, STDIN);
+	dup2(fd->fd2, STDOUT);
+    fd->pipe_nb = args->ac - 3;
+	ft_get_fd(fd, &j, args, 0);
+	while (j <= fd->pipe_nb)
+	{
+    	ft_get_fd(fd, &j, args, 1);
+        j++;
+	}
+	if (!ft_child_process(args, &j))
+	    	return (0);
+    wait(NULL);
     return (1);
 }
 
 
 int main(int argc, char **argv, char **envp)
 {
-    char    **paths;
+	t_args	args;
+	t_fd	fd;
 
+	args.ac = argc;
+	args.av = argv;
+	args.env = envp;
+	fd.fd1 = open(args.av[1], O_RDONLY);
+	if (fd.fd1 < 0)
+		return (0);
+	fd.fd2 = open(args.av[args.ac - 1], O_CREAT | O_RDWR | O_TRUNC, 0644);
+	if (fd.fd2 < 0)
+	{
+		close(fd.fd1);
+        return (0);
+	}
     if (!argc)
         return (0);
-    paths = ft_parsing(envp);
-    if (!paths)
+    args.paths = ft_parsing(envp);
+    if (!args.paths)
+	{
+		close(fd.fd1);
+		close(fd.fd2);
         return (0);
-    if (!ft_pipex(argc, argv, envp, paths))
+	}
+    if (!ft_pipex(&args, &fd))
     {
-        ft_free_all((void **)paths);
+        ft_free_all((void **)args.paths);
+		close(fd.fd1);
+		close(fd.fd2);
         return (0);
     }
     return (0);

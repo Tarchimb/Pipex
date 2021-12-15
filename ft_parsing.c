@@ -9,7 +9,7 @@ char *ft_get_envp_path(char **envp, char *path)
     {
         path = ft_strnstr(envp[i],
             "PATH=", ft_strlen(envp[i]));
-        if (path != NULL && ft_strlen(path) > 30)
+        if (path != NULL && ft_strlen(path) > 70)
             return (path);
         i++;
     }

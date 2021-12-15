@@ -19,12 +19,20 @@ char    *ft_get_envp_path(char **envp, char *path);
 
 typedef struct s_fd
 {
-    int fd[2];
-    int fd1;
-    int fd2;
-    int id;
-    int pipe_nb;
+    int     fd[2];
+    int     fd1;
+    int     fd2;
+    pid_t   pid;
+    int     pipe_nb;
 }   t_fd;
+
+typedef struct s_args
+{
+    int     ac;
+    char    **av;
+    char    **env;
+    char    **paths;
+}   t_args;
 
 
 
