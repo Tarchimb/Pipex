@@ -19,6 +19,8 @@
 #define INFILE_ERROR 1
 #define OUTFILE_ERROR 2
 #define MALLOC_ERROR 3
+#define WRITE_HAND fd->fd[1]
+#define READ_HAND fd->fd[0]
 
 char    **ft_parsing(char **envp);
 char    *ft_get_envp_path(char **envp, char *path);

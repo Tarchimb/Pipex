@@ -52,14 +52,14 @@ int ft_get_fd(t_fd *fd, int *j, t_args *args, int fdin)
 	fd->pid = fork();
 	if (fd->pid != 0)
 	{
-		close(fd->fd[1]);
-		dup2(fd->fd[0], STDIN);
+		close(WRITE_HAND);
+		dup2(READ_HAND, STDIN);
 		waitpid(fd->pid, NULL, 0);
 	}
 	else
 	{
-		close(fd->fd[0]);
-		dup2(fd->fd[1], STDOUT);
+		close(READ_HAND);
+		dup2(WRITE_HAND, STDOUT);
 		if (fdin == STDIN)
 		 	exit(1);
 		else
@@ -77,19 +77,26 @@ int ft_pipex(t_args *args, t_fd *fd)
 	dup2(fd->fd1, STDIN);
 	dup2(fd->fd2, STDOUT);
     fd->pipe_nb = args->ac - 3;
-	if (!ft_get_fd(fd, &j, args, 0))
-        return (0);
-	while (j <= fd->pipe_nb)
-	{
-    	if (!ft_get_fd(fd, &j, args, 1))
+    pipe(fd->fd);
+    fd->pid = fork();
+    if (fd->pid == 0)
+    {
+        if (!ft_get_fd(fd, &j, args, 0))
             return (0);
-        j++;
-	}
-    close(fd->fd[0]);
-    close(fd->fd[1]);
-	if (!ft_exec_process(args, &j))
+        while (j <= fd->pipe_nb)
+        {
+            if (!ft_get_fd(fd, &j, args, 1))
+                return (0);
+            j++;
+        }
+        close(READ_HAND);
+        close(WRITE_HAND);
+	    if (!ft_exec_process(args, &j))
 	    	return (0);
-    return (1);
+    }
+    else
+		waitpid(fd->pid, NULL, 0);
+    return (0);
 }
 
 int ft_error(int error, t_fd *fd)
