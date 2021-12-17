@@ -6,7 +6,7 @@
 #    By: tarchimb <tarchimb@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/17 11:24:39 by tarchimb          #+#    #+#              #
-#    Updated: 2021/12/02 11:59:11 by tarchimb         ###   ########.fr        #
+#    Updated: 2021/12/17 14:25:07 by tarchimb         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,35 +24,35 @@ CFLAGS		= -Wall -Wextra -Werror
 
 NAME		=	pipexlib.a
 
-RM			=	rm -f
+LIBS		= 	./libft/libft.a			\
+				./pipexlib.a			\
+				
+EXEC		=	pipex
 
-LIBS		= 	./Libs/libft.a			\
-				./Libs/pipexlib.a			\
-
-all:		${NAME}
+all:		libft ${EXEC}
 
 %.o:		%.c ${INCLUDES}
 			${CC} ${CFLAGS} -I ./Includes -c $< -o $@
 
-gc:
-			${CC} ${CFLAGS} ${LIBS} pipex.c -o pipex
-			./pipex infile "sleep 2" "lol" outfile
+${EXEC}:	pipex.c ${LIBS}
+			${CC} ${CFLAGS} ${LIBS} pipex.c -o ${EXEC}
+
+libft:		${INCLUDES}
+			make -C libft
 
 
 $(NAME):	${OBJS} ${INCLUDES}
-			make -C ./Libft
 			ar rcs ${NAME} ${OBJS}
-			mv ${NAME} ./Libs
 
 clean:
 			@${RM} ${OBJS} ${OBJSBONUS}
-			make clean -C ./Libft
+			make clean -C ./libft
 
 
 fclean:		clean
-			make fclean -C ./Libft
+			make fclean -C ./libft
 			@${RM} ${NAME}
 
 re:			fclean all
 
-.PHONY: 	all clean fclean re
+.PHONY: 	all clean fclean libft
