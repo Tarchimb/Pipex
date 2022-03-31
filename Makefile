@@ -6,19 +6,19 @@
 #    By: tarchimb <tarchimb@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/17 11:24:39 by tarchimb          #+#    #+#              #
-#    Updated: 2021/12/17 14:25:07 by tarchimb         ###   ########.fr        #
+#    Updated: 2022/03/31 14:36:29 by tarchimb         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-SRCS		=	pipex.c						\
-				ft_parsing.c				\
+SRCS		=	pipex.c					\
+				ft_parsing.c			\
 
 OBJS		=	${SRCS:.c=.o}
 
-INCLUDES	=	./Includes/pipex.h			\
-				./Includes/libft.h			\
+INCLUDES	=	./Includes/pipex.h		\
+				./Includes/libft.h		\
 
-CC			= gcc \
+CC			= gcc 						\
 
 CFLAGS		= -Wall -Wextra -Werror
 
@@ -51,7 +51,7 @@ clean:
 
 fclean:		clean
 			make fclean -C ./libft
-			@${RM} ${NAME}
+			@${RM} ${EXEC} ${NAME}
 
 re:			fclean all
 

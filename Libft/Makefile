@@ -3,12 +3,13 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: tarchimb <marvin@42.fr>                    +#+  +:+       +#+         #
+#    By: tarchimb <tarchimb@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/04 14:57:46 by tarchimb          #+#    #+#              #
-#    Updated: 2021/11/08 11:08:13 by tarchimb         ###   ########lyon.fr    #
+#    Updated: 2021/12/17 14:55:31 by tarchimb         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
+
 SRCS		=	./ft_atoi.c ./ft_calloc.c ./ft_isalpha.c ./ft_isdigit.c \
       			./ft_memcmp.c ./ft_memmove.c ./ft_putchar_fd.c\
 				./ft_split.c ./ft_strdup.c ./ft_strjoin.c ./ft_strlcpy.c \
@@ -20,7 +21,7 @@ SRCS		=	./ft_atoi.c ./ft_calloc.c ./ft_isalpha.c ./ft_isdigit.c \
 				./ft_toupper.c ./ft_itoa.c ./ft_putnbr_fd.c ./ft_strlcat.c\
 				./ft_lstadd_back.c ./ft_lstadd_front.c \
 				./ft_lstlast.c ./ft_lstsize.c ./ft_lstnew.c ./ft_lstclear.c \
-				./ft_lstiter.c ./ft_lstdelone.c  ./ft_lstmap.c \
+				./ft_lstiter.c ./ft_lstdelone.c  ./ft_lstmap.c ./ft_free_all.c \
 
 OBJS		=	${SRCS:.c=.o}
 
@@ -37,12 +38,11 @@ RM			=	rm -f
 
 all:		${NAME}
 
-.c.o:		${INCLUDES}
-			${CC} ${CFLAGS} -c $< -o ${<:.c=.o}
+%.o:		%.c ${INCLUDES}
+			${CC} ${CFLAGS} -c $< -o $@
 
 $(NAME):	${OBJS} ${INCLUDES}
 			ar rcs ${NAME} ${OBJS}
-			mv ${NAME} ../Libs/
 
 clean:
 			${RM} ${OBJS} ${OBJSBONUS}
@@ -52,4 +52,4 @@ fclean:		clean
 
 re:			fclean all
 
-.PHONY: 	all clean fclean re bonus
+.PHONY: 	all clean fclean re
